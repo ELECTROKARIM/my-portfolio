@@ -5,8 +5,8 @@ const sectionStyles = {
   padding: '20px',
   backgroundColor: '#2e4053',
   color: '#fff',
-  border: '2px solid #fff', // Bordure blanche autour de la section
-  borderRadius: '8px' // Coins arrondis pour la section
+  border: '2px solid #fff',
+  borderRadius: '8px'
 };
 
 const listStyles = {
@@ -14,21 +14,22 @@ const listStyles = {
   padding: 0,
   margin: 0,
   display: 'flex',
-  flexDirection: 'row', // Aligner horizontalement
-  flexWrap: 'wrap', // Pour permettre les retours à la ligne si nécessaire
+  flexDirection: 'row',
+  flexWrap: 'wrap',
   gap: '20px',
-  alignItems: 'center'
+  alignItems: 'center',
+  justifyContent: 'center'
 };
 
 const itemStyles = (color) => ({
   backgroundColor: '#5f6a6a',
-  border: '1px solid #444', // Bordure sombre autour de chaque boîte de compétence
-  borderRadius: '8px', // Coins arrondis pour chaque boîte de compétence
+  border: '1px solid #444',
+  borderRadius: '8px',
   padding: '10px',
   fontSize: '16px',
   width: '300px',
   color: '#fff',
-  cursor: 'pointer' // Ajouter un curseur pointer pour indiquer que c'est interactif
+  cursor: 'pointer'
 });
 
 const barContainerStyles = {
@@ -46,24 +47,24 @@ const barStyles = (progress, color) => ({
   transition: 'width 0.5s'
 });
 
-// Styles pour les cercles des langues
 const languageContainerStyles = {
   display: 'flex',
   flexDirection: 'row',
   flexWrap: 'wrap',
   gap: '20px',
-  marginTop: '20px'
+  marginTop: '20px',
+  justifyContent: 'center'
 };
 
 const circleContainerStyles = {
   position: 'relative',
-  width: '120px', // Taille des cercles
-  height: '120px', // Taille des cercles
+  width: '120px',
+  height: '120px'
 };
 
 const circleSVGStyles = {
   width: '100%',
-  height: '100%',
+  height: '100%'
 };
 
 const circleTextStyles = {
@@ -74,12 +75,12 @@ const circleTextStyles = {
   textAlign: 'center',
   fontSize: '16px',
   color: '#fff',
-  pointerEvents: 'none' // Assurez-vous que le texte n'interfère pas avec les événements de souris
+  pointerEvents: 'none'
 };
 
 const circleStyles = (color, percentage) => {
-  const radius = 45; // Rayon du cercle
-  const circumference = 2 * Math.PI * radius; // Circonférence du cercle
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percentage / 100) * circumference;
 
   return {
@@ -95,7 +96,6 @@ const circleStyles = (color, percentage) => {
 };
 
 const Skills = () => {
-  const [isVisible, setIsVisible] = useState(false);
   const [progresses, setProgresses] = useState({
     'JavaScript': 0,
     'React': 0,
@@ -130,10 +130,10 @@ const Skills = () => {
     { name: 'Chinois', level: 50, color: '#1abc9c' }
   ];
 
-  const animateProgress = useCallback((skill) => {
+  const animateProgress = useCallback((name, level, setFunction) => {
     let start = 0;
-    const end = skill.level;
-    const duration = 2000; // Durée de l'animation en ms
+    const end = level;
+    const duration = 2000;
     const stepTime = 20;
     const totalSteps = duration / stepTime;
     const stepIncrement = (end - start) / totalSteps;
@@ -144,28 +144,18 @@ const Skills = () => {
         start = end;
         clearInterval(interval);
       }
-      setProgresses(prev => ({ ...prev, [skill.name]: Math.round(start) }));
+      setFunction(prev => ({ ...prev, [name]: Math.round(start) }));
     }, stepTime);
   }, []);
 
-  const animateLanguageProgress = useCallback((language) => {
-    const level = languages.find(l => l.name === language).level;
-    setLanguageProgresses(prev => ({ ...prev, [language]: level })); // Remplir le cercle selon le niveau
-  }, []);
-
-  const handleMouseEnter = (skill) => {
-    setProgresses(prev => ({ ...prev, [skill.name]: 0 })); // Réinitialiser le progrès
-    animateProgress(skill); // Redémarrer l'animation
-  };
-
-  const handleLanguageMouseEnter = (language) => {
-    setLanguageProgresses(prev => ({ ...prev, [language]: 0 })); // Réinitialiser le progrès
-    animateLanguageProgress(language); // Redémarrer l'animation
+  const handleMouseEnter = (item, setFunction) => {
+    setFunction(prev => ({ ...prev, [item.name]: 0 }));
+    animateProgress(item.name, item.level, setFunction);
   };
 
   const handleChange = (isVisible) => {
     if (isVisible) {
-      skills.forEach(skill => animateProgress(skill));
+      skills.forEach(skill => animateProgress(skill.name, skill.level, setProgresses));
     }
   };
 
@@ -179,7 +169,7 @@ const Skills = () => {
               <li
                 key={index}
                 style={itemStyles(skill.color)}
-                onMouseEnter={() => handleMouseEnter(skill)}
+                onMouseEnter={() => handleMouseEnter(skill, setProgresses)}
               >
                 <div>{skill.name}</div>
                 <div style={barContainerStyles}>
@@ -193,7 +183,7 @@ const Skills = () => {
               <div
                 key={index}
                 style={circleContainerStyles}
-                onMouseEnter={() => handleLanguageMouseEnter(language.name)}
+                onMouseEnter={() => handleMouseEnter(language, setLanguageProgresses)}
               >
                 <svg
                   style={circleSVGStyles}
@@ -216,7 +206,7 @@ const Skills = () => {
                 </svg>
                 <div style={circleTextStyles}>
                   <div>{language.name}</div>
-                  <div>{languageProgresses[language.name] || language.level}%</div>
+                  <div>{languageProgresses[language.name]}%</div>
                 </div>
               </div>
             ))}
